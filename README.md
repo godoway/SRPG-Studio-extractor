@@ -1,6 +1,6 @@
 # SRPG Studio Extractor
 
-A extractor to extract data.dts from SPRG Studio SRPG-Studio archive file
+A extractor to extract data.dts from SPRG Studio archive file
 
 
 ## Usage 
@@ -65,3 +65,4 @@ java -jar srpgstudio-extractor-0.1.jar -generate encryptFile decryptFile [--outp
 | 4 bytes | position of "Fonts" |
 | 4 bytes | position of "Video" |
 | 4 bytes | position of "Script" |
+
