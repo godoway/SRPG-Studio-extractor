@@ -24,7 +24,7 @@ java -jar srpgstudio-extractor-0.1.jar -generate encryptFile decryptFile [--outp
 
 | length | content|
 | :---: | --- |
-| 4 bytes | DTST(signatures) |
+| 4 bytes | SDTS(signatures) |
 | 4 bytes | isDecrypt |
 | 4 bytes | SRPG Studio version |
 | 8 bytes | I DON'T KNOWN |
