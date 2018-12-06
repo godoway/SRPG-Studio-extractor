@@ -10,6 +10,8 @@ gen### Gradle template
 .gradle
 /build/
 /tmp/
+*.xlsx
+*.docs
 
 # Ignore Gradle GUI config
 gradle-app.setting
