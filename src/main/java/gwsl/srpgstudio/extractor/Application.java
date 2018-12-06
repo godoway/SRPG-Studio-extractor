@@ -4,9 +4,9 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import gwsl.srpgstudio.extractor.struct.DataStruct;
 import gwsl.srpgstudio.extractor.util.FileConverter;
-import gwsl.srpgstudio.extractor.work.Analyzer;
-import gwsl.srpgstudio.extractor.work.Cryptor;
-import gwsl.srpgstudio.extractor.work.Extractor;
+import gwsl.srpgstudio.extractor.feature.Analyzer;
+import gwsl.srpgstudio.extractor.feature.Cryptor;
+import gwsl.srpgstudio.extractor.feature.Extractor;
 import lombok.Data;
 
 import java.io.File;
@@ -104,6 +104,10 @@ public class Application {
         private File output = new File("output");
         @Parameter(names = {"--cut", "-C"}, description = "only cut the project file")
         private boolean cut = false;
+        @Parameter(names = {"--thread"}, description = "set multiple thread num.(Not implemented)")
+        private int threadNum;
+        @Parameter(names = {"--patch"}, description = "set the translate file to patch game.(Not implemented)")
+        private File patch;
     }
 
 }

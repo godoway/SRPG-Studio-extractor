@@ -1,4 +1,4 @@
-package gwsl.srpgstudio.extractor.work;
+package gwsl.srpgstudio.extractor.feature;
 
 import gwsl.srpgstudio.extractor.struct.DataStruct;
 import gwsl.srpgstudio.extractor.struct.FileType;
@@ -18,6 +18,7 @@ public class Extractor {
     private File target;
     private File output;
     private boolean cutOnly;
+//    private ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(4)
 
     public Extractor(File target, File output) {
         this.target = target;

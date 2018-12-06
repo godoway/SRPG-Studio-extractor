@@ -1,4 +1,4 @@
-package gwsl.srpgstudio.extractor.work;
+package gwsl.srpgstudio.extractor.feature;
 
 import gwsl.srpgstudio.extractor.struct.DataStruct;
 import gwsl.srpgstudio.extractor.struct.Resource;
