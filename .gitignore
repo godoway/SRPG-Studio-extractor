@@ -4,12 +4,12 @@
 
 # IntelliJ project files
 .idea
-*.iml
 out
 gen### Gradle template
 .gradle
 /build/
 /tmp/
+/output/
 *.xlsx
 *.docs
 
