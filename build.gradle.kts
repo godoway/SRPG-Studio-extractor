@@ -13,6 +13,7 @@ repositories {
 dependencies {
     compile("com.beust:jcommander:1.72")
 //    compile("com.google.code.gson:gson:2.8.5")
+    compile("org.apache.commons:commons-csv:1.6")
     testImplementation("junit:junit:4.12")
     compileOnly("org.projectlombok:lombok:1.16.20")
 }
@@ -39,8 +40,5 @@ tasks.withType<Jar> {
         attributes["Implementation-Version"] = version
         attributes["Main-Class"] = "gwsl.srpgstudio.extractor.Application"
     }
-//    configurations["compileClasspath"].forEach { file: File ->
-//        from(zipTree(file.absoluteFile))
-//    }
     from(configurations.compile.map { if (it.isDirectory) it else zipTree(it) })
 }
