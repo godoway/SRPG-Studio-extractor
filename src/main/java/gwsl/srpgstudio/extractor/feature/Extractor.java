@@ -26,19 +26,13 @@ public class Extractor {
     }
 
     public void extract() {
-        extractResource();
+        if (!cutOnly) extractResource();
         extractProject();
     }
 
     private void extractProject() {
         System.out.println("start to unpack project...");
-        Resource projectResource = new Resource();
-        projectResource.setPath(".");
-        projectResource.setName("project");
-        projectResource.setSuffix("no-srpgs");
-        projectResource.setBegin(struct.getProjectBegin());
-        projectResource.setSize(struct.getProjectSize());
-        projectResource.setEnd(struct.getProjectBegin() + struct.getProjectSize() - 1);
+        Resource projectResource = struct.getProjectResource();
         ExtractTask projectTask = new ExtractTask(projectResource);
         projectTask.run();
         System.out.println("unpack project end.");
@@ -61,9 +55,12 @@ public class Extractor {
     private class ExtractTask implements Runnable {
 
         private Resource resource;
+        private long realSize;
+        private int buffSize = 1024 * 32;
 
         ExtractTask(Resource resource) {
             this.resource = resource;
+            this.realSize = resource.getSize();
         }
 
         @Override
@@ -71,8 +68,6 @@ public class Extractor {
             try (RandomAccessFile sourceFile = new RandomAccessFile(target, "r");
                  FileChannel sourceChannel = sourceFile.getChannel()) {
 
-                long realSize = resource.getSize();
-                int buffSize = 1024 * 32;
                 sourceChannel.position(resource.getBegin());
                 ByteBuffer sourceBuff = ByteBuffer.allocate(buffSize);
                 ByteBuffer outputBuff = ByteBuffer.allocate(buffSize);
@@ -135,10 +130,6 @@ public class Extractor {
                 e.printStackTrace();
             }
         }
-    }
-
-    public boolean isCutOnly() {
-        return cutOnly;
     }
 
     public void setCutOnly(boolean cutOnly) {

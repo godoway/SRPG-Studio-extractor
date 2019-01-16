@@ -85,5 +85,15 @@ public class DataStruct {
         fragments.add(new Fragment("Video"));
     }
 
+    public Resource getProjectResource() {
+        Resource projectResource = new Resource();
+        projectResource.setPath(".");
+        projectResource.setName("project");
+        projectResource.setSuffix("no-srpgs");
+        projectResource.setBegin(this.getProjectBegin());
+        projectResource.setSize(this.getProjectSize());
+        projectResource.setEnd(this.getProjectBegin() + this.getProjectSize() - 1);
+        return projectResource;
+    }
 
 }

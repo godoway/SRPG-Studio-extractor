@@ -44,10 +44,10 @@ public class Application {
             }
             DataStruct struct = analysis(target);
 //            System.out.println(gson.toJson(struct));
-            if (unpack) {
+           if (unpack) {
                 unpack(key, target, output, cutOnly);
             } else {
-                crypt(key, target, output);
+                crypt(key, target);
             }
         } else {
             commander.usage();
@@ -74,7 +74,7 @@ public class Application {
     private static void unpack(File key, File target, File output, boolean cutOnly) throws IOException {
         if (DataStruct.getInstance().isEncrypt()) {
             System.out.println("the data.dts is encrypt.");
-            crypt(key, target, output);
+            crypt(key, target);
         }
         Extractor extractor = new Extractor(target, output);
         extractor.setCutOnly(cutOnly);
@@ -82,11 +82,11 @@ public class Application {
 
     }
 
-    private static void crypt(File key, File target, File output) throws IOException {
+    private static void crypt(File key, File target) throws IOException {
         if (!key.exists()) {
             throw new IllegalStateException("key does not exists.");
         }
-        Cryptor cryptor = new Cryptor(key, target, output);
+        Cryptor cryptor = new Cryptor(key, target);
         cryptor.crypt();
     }
 

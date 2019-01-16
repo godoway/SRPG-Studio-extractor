@@ -19,12 +19,10 @@ import java.util.List;
 public class Analyzer {
 
     private DataStruct struct = DataStruct.getInstance();
-    private File target;
     private RandomAccessFile source;
     private FileChannel sourceChannel;
 
     public Analyzer(File target) throws FileNotFoundException {
-        this.target = target;
         source = new RandomAccessFile(target, "r");
     }
 

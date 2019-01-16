@@ -19,7 +19,6 @@ public class Cryptor {
     private String cryptMode = struct.isEncrypt() ? "decrypt" : "encrypt";
     private File key;
     private File target;
-    private File output;
     private List<File> generateKeyList;
 //    private ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
 
@@ -28,10 +27,9 @@ public class Cryptor {
         this.generateKeyList = generateKeyList;
     }
 
-    public Cryptor(File key, File target, File output) {
+    public Cryptor(File key, File target) {
         this.key = key;
         this.target = target;
-        this.output = output;
     }
 
     public void generateKey() throws IOException {
@@ -112,13 +110,7 @@ public class Cryptor {
         });
 
         System.out.println(String.format("start to %s project...", cryptMode));
-        Resource projectResource = new Resource();
-        projectResource.setPath(".");
-        projectResource.setName("project");
-        projectResource.setSuffix("no-srpgs");
-        projectResource.setBegin(struct.getProjectBegin());
-        projectResource.setSize(struct.getProjectSize());
-        projectResource.setEnd(struct.getProjectBegin() + struct.getProjectSize() - 1);
+        Resource projectResource = struct.getProjectResource();
         DecryptTask projectTask = new DecryptTask(projectResource);
         projectTask.run();
         System.out.println(String.format("%s project end.", cryptMode));
@@ -142,9 +134,12 @@ public class Cryptor {
     private class DecryptTask implements Runnable {
 
         private Resource resource;
+        private long realSize;
+        private int buffSize = 1024 * 32;
 
         DecryptTask(Resource resource) {
             this.resource = resource;
+            this.realSize = resource.getSize();
         }
 
         @Override
@@ -155,15 +150,13 @@ public class Cryptor {
                  FileChannel sourceChannel = sourceFile.getChannel();
                  FileChannel keyChannel = keyFile.getChannel()) {
 
-                long realSize = resource.getSize();
-                int buffSize = 1024 * 32;
                 sourceChannel.position(resource.getBegin());
                 ByteBuffer sourceBuff = ByteBuffer.allocate(buffSize);
                 ByteBuffer keyBuff = ByteBuffer.allocate(buffSize);
                 long hadRead = 0L;
                 long hadWrite = 0L;
                 int srcRead = sourceChannel.read(sourceBuff);
-                int keyRead = keyChannel.read(keyBuff);
+                keyChannel.read(keyBuff);
 
                 while (srcRead != -1) {
                     hadRead += srcRead;
