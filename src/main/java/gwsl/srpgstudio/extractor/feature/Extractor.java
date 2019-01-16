@@ -51,10 +51,10 @@ public class Extractor {
                 .flatMap(fragment -> fragment.getResourceGroups().stream())
                 .flatMap(resourceGroup -> resourceGroup.getResources().stream())
                 .collect(Collectors.toList());
-        resources.forEach(resource -> {
-            ExtractTask task = new ExtractTask(resource);
+        for (int i = resources.size() - 1; i > -1; i--) {
+            ExtractTask task = new ExtractTask(resources.get(i));
             task.run();
-        });
+        }
         System.out.println("extract end.");
     }
 
@@ -95,6 +95,7 @@ public class Extractor {
                 if (!parent.exists() && !parent.mkdirs()) {
                     throw new IllegalStateException("Couldn't create dir: " + parent);
                 }
+                System.out.println("extractor: " + save.getPath());
                 RandomAccessFile outputFile = new RandomAccessFile(save, "rw");
                 FileChannel outputChannel = outputFile.getChannel();
                 sourceChannel.position(resource.getBegin());
@@ -127,10 +128,10 @@ public class Extractor {
                     srcRead = sourceChannel.read(sourceBuff);
                 }
 
-
                 outputChannel.close();
                 outputFile.close();
-            } catch (IOException e) {
+                Thread.sleep(10);
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
