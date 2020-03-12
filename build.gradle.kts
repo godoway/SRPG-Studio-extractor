@@ -1,6 +1,7 @@
 plugins {
     java
-//    application
+    application
+    id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
 group = "gwsl"
@@ -11,34 +12,30 @@ repositories {
 }
 
 dependencies {
-    compile("com.beust:jcommander:1.72")
-//    compile("com.google.code.gson:gson:2.8.5")
-    compile("org.apache.commons:commons-csv:1.6")
+    implementation("com.beust:jcommander:1.72")
+//    implementation("com.google.code.gson:gson:2.8.5")
+    implementation("org.apache.commons:commons-csv:1.6")
     testImplementation("junit:junit:4.12")
-    compileOnly("org.projectlombok:lombok:1.16.20")
+//    annotationProcessor("org.projectlombok:lombok:1.16.20")
+//    compileOnly("org.projectlombok:lombok:1.16.20")
 }
 
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
+application {
+    applicationName = project.name
+    group = "gwsl"
+    mainClassName = "gwsl.srpgstudio.extractor.Application"
 }
 
-//application {
-//    applicationName = project.name
-//    group = "gwsl"
-//    mainClassName = "gwsl.srpgstudio.extractor.Application"
-//}
-
-
-tasks.withType<Jar> {
-    baseName = project.name
-    manifest {
-        attributes["Implementation-Title"] = "Gradle Jar File Example"
-        attributes["Implementation-Version"] = version
-        attributes["Main-Class"] = "gwsl.srpgstudio.extractor.Application"
+tasks {
+    compileJava {
+        options.encoding = "utf-8"
     }
-    from(configurations.compile.map { if (it.isDirectory) it else zipTree(it) })
+
+    shadowJar {
+        archiveClassifier.set("fat")
+    }
 }

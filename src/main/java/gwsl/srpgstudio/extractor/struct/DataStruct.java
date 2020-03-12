@@ -1,11 +1,9 @@
 package gwsl.srpgstudio.extractor.struct;
 
-import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
 public class DataStruct {
 
     private static volatile DataStruct INSTANCE;
@@ -96,4 +94,52 @@ public class DataStruct {
         return projectResource;
     }
 
+
+    public static DataStruct getINSTANCE() {
+        return INSTANCE;
+    }
+
+    public static void setINSTANCE(DataStruct INSTANCE) {
+        DataStruct.INSTANCE = INSTANCE;
+    }
+
+    public long getProjectBegin() {
+        return projectBegin;
+    }
+
+    public void setProjectBegin(long projectBegin) {
+        this.projectBegin = projectBegin;
+    }
+
+    public long getProjectSize() {
+        return projectSize;
+    }
+
+    public void setProjectSize(long projectSize) {
+        this.projectSize = projectSize;
+    }
+
+    public boolean isEncrypt() {
+        return isEncrypt;
+    }
+
+    public void setEncrypt(boolean encrypt) {
+        isEncrypt = encrypt;
+    }
+
+    public List<Fragment> getFragments() {
+        return fragments;
+    }
+
+    public void setFragments(List<Fragment> fragments) {
+        this.fragments = fragments;
+    }
+
+    public List<FileType> getFileTypeList() {
+        return fileTypeList;
+    }
+
+    public void setFileTypeList(List<FileType> fileTypeList) {
+        this.fileTypeList = fileTypeList;
+    }
 }

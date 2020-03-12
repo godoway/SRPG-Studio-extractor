@@ -1,8 +1,5 @@
 package gwsl.srpgstudio.extractor.struct;
 
-import lombok.Data;
-
-@Data
 public class FileType {
 
     private String suffix;
@@ -13,4 +10,19 @@ public class FileType {
         this.header = header;
     }
 
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public void setSuffix(String suffix) {
+        this.suffix = suffix;
+    }
+
+    public byte[] getHeader() {
+        return header;
+    }
+
+    public void setHeader(byte[] header) {
+        this.header = header;
+    }
 }

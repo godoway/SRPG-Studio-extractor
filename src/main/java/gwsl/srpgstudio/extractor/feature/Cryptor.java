@@ -2,7 +2,6 @@ package gwsl.srpgstudio.extractor.feature;
 
 import gwsl.srpgstudio.extractor.struct.DataStruct;
 import gwsl.srpgstudio.extractor.struct.Resource;
-import lombok.Data;
 
 import java.io.File;
 import java.io.IOException;
@@ -130,7 +129,6 @@ public class Cryptor {
     }
 
 
-    @Data
     private class DecryptTask implements Runnable {
 
         private Resource resource;
@@ -194,6 +192,30 @@ public class Cryptor {
                 e.printStackTrace();
             }
             System.out.println(String.format("%s [%s] end.", cryptMode, resource.savePath()));
+        }
+
+        public Resource getResource() {
+            return resource;
+        }
+
+        public void setResource(Resource resource) {
+            this.resource = resource;
+        }
+
+        public long getRealSize() {
+            return realSize;
+        }
+
+        public void setRealSize(long realSize) {
+            this.realSize = realSize;
+        }
+
+        public int getBuffSize() {
+            return buffSize;
+        }
+
+        public void setBuffSize(int buffSize) {
+            this.buffSize = buffSize;
         }
     }
 

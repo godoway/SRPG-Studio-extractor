@@ -7,7 +7,6 @@ import gwsl.srpgstudio.extractor.util.FileConverter;
 import gwsl.srpgstudio.extractor.feature.Analyzer;
 import gwsl.srpgstudio.extractor.feature.Cryptor;
 import gwsl.srpgstudio.extractor.feature.Extractor;
-import lombok.Data;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,7 +89,8 @@ public class Application {
         cryptor.crypt();
     }
 
-    @Data
+
+
     private static class Arguments {
         @Parameter(names = {"--target", "-T"}, converter = FileConverter.class, description = "set file to decrypt or encrypt.")
         private File target;
@@ -108,6 +108,70 @@ public class Application {
         private int threadNum;
         @Parameter(names = {"--patch"}, description = "set the translate file to patch game.(Not implemented)")
         private File patch;
+
+        public File getTarget() {
+            return target;
+        }
+
+        public void setTarget(File target) {
+            this.target = target;
+        }
+
+        public File getKey() {
+            return key;
+        }
+
+        public void setKey(File key) {
+            this.key = key;
+        }
+
+        public List<File> getListToGenerateKey() {
+            return listToGenerateKey;
+        }
+
+        public void setListToGenerateKey(List<File> listToGenerateKey) {
+            this.listToGenerateKey = listToGenerateKey;
+        }
+
+        public boolean isUnpack() {
+            return unpack;
+        }
+
+        public void setUnpack(boolean unpack) {
+            this.unpack = unpack;
+        }
+
+        public File getOutput() {
+            return output;
+        }
+
+        public void setOutput(File output) {
+            this.output = output;
+        }
+
+        public boolean isCut() {
+            return cut;
+        }
+
+        public void setCut(boolean cut) {
+            this.cut = cut;
+        }
+
+        public int getThreadNum() {
+            return threadNum;
+        }
+
+        public void setThreadNum(int threadNum) {
+            this.threadNum = threadNum;
+        }
+
+        public File getPatch() {
+            return patch;
+        }
+
+        public void setPatch(File patch) {
+            this.patch = patch;
+        }
     }
 
 }

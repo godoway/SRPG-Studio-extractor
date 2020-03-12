@@ -21,8 +21,4 @@ generate key need two file(big enough) which one is encrypt and other one is dec
 java -jar srpgstudio-extractor-0.1.jar --generate encryptFile decryptFile [--output outputPath]
 ```
 
-## Unimplemented 
-* export text
-* translation patch
-* ~~decompile to .srpg~~
 
