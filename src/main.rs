@@ -8,7 +8,7 @@ use std::path::Path;
 use clap::{App, AppSettings};
 
 use srpg_studio_extractor::{command, DIRECTORIES};
-use srpg_studio_extractor::info::{DataInfo, ResourceGroup};
+use srpg_studio_extractor::info::{DataInfo, ResourceGroup, Resource};
 use std::convert::TryInto;
 
 fn main() -> Result<(), io::Error> {
@@ -126,11 +126,11 @@ fn analyze_fragments<'a>(file: &'a File, data: &'a mut DataInfo) -> &'a DataInfo
     let buff = &mut [0u8; 1024];
 
     let fragments = &mut data.fragments;
-    fragments.iter_mut()
+    let mut resource_groups: Vec<_> = fragments.iter_mut()
         .filter(|f| f.size != 0)
-        .for_each(|f| {
+        .map(|f| {
             let position = SeekFrom::Start(f.begin as u64);
-            &reader.seek(position).unwrap();
+            reader.seek(position).unwrap();
 
             reader.read(bytes4).unwrap();
             let count = if f.size == 0 {
@@ -162,12 +162,62 @@ fn analyze_fragments<'a>(file: &'a File, data: &'a mut DataInfo) -> &'a DataInfo
                 let resource_group = ResourceGroup {
                     begin: positions[i] + f.begin,
                     end: positions[i + 1],
-                    name: "".to_string(),
-                    path: String::from(&f.path),
+                    path: f.path.to_owned(),
+                    resources: vec![],
                 };
                 resource_groups.push(resource_group);
             }
             f.resource_group = resource_groups;
+            f
+        })
+        .flat_map(|f| &mut f.resource_group)
+        .collect();
+    resource_groups.iter_mut()
+        .for_each(|rg| {
+            let mut position = SeekFrom::Start(rg.begin as u64);
+
+            reader.seek(position).unwrap();
+            reader.read(bytes4).unwrap();
+            let name_len = u32::from_le_bytes(*bytes4) as usize;
+
+            let mut name_bytes = vec![0; name_len as usize];
+            reader.read_exact(&mut name_bytes).unwrap();
+            let (_, u16_bytes, _) = unsafe {
+                name_bytes[..(name_len - 2)].align_to::<u16>()
+            };
+            let name = String::from_utf16_lossy(u16_bytes);
+
+            position = SeekFrom::Current(8);
+            reader.seek(position).unwrap();
+            reader.read(bytes4).unwrap();
+            let resource_count = u32::from_le_bytes(*bytes4);
+
+            let mut resources: Vec<Resource> = Vec::new();
+            for i in 0..resource_count {
+                reader.read(bytes4).unwrap();
+                let size = u32::from_le_bytes(*bytes4);
+                let name = if i > 0 {
+                    let c = (96u8 + i as u8) as char;
+                    format!("{}-{}", name, c)
+                } else { name.to_owned() };
+
+                let resource = Resource {
+                    begin: 0,
+                    end: 0,
+                    size,
+                    name,
+                    suffix: "unknown".to_string(),
+                };
+                resources.push(resource);
+            }
+            let mut p = reader.seek(SeekFrom::Current(0)).unwrap() as u32;
+            for i in 0..(resource_count as usize) {
+                let mut r = &mut resources[i];
+                r.begin = p;
+                r.end = r.begin + r.size - 1;
+                p = p + r.size;
+            }
+            rg.resources = resources;
         });
     data
 }
