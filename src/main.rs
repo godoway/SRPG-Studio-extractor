@@ -1,17 +1,17 @@
 extern crate clap;
 
-use std::{fs, io};
+use std::{fs, panic};
 use std::fs::File;
-use std::io::{BufReader, Read, Seek, SeekFrom};
+use std::io::{BufReader, Read, Seek, SeekFrom, Error};
 use std::path::Path;
 
 use clap::{App, AppSettings};
 
-use srpg_studio_extractor::{command, DIRECTORIES};
+use srpg_studio_extractor::{command, DIRECTORIES, DIRECTORIES_LEN};
 use srpg_studio_extractor::info::{DataInfo, ResourceGroup, Resource};
 use std::convert::TryInto;
 
-fn main() -> Result<(), io::Error> {
+fn main() -> Result<(), Error> {
     let unpack = command::unpack_command();
     let keygen = command::keygen_command();
     let sub_commands = vec![unpack, keygen];
@@ -34,8 +34,8 @@ fn main() -> Result<(), io::Error> {
             let file = File::open(path).unwrap();
             let mut data = analyze_header(&file);
             analyze_fragments(&file, &mut data);
-
             println!("{}", serde_json::to_string(&data).unwrap());
+
             create_unpack_dir(output)?;
         }
         (command::KEYGEN, Some(sub)) => {
@@ -50,7 +50,7 @@ fn main() -> Result<(), io::Error> {
     Ok(())
 }
 
-fn create_unpack_dir(output: &str) -> Result<(), io::Error> {
+fn create_unpack_dir(output: &str) -> Result<(), Error> {
     let dir = Path::new(output);
     if !dir.exists() {
         fs::create_dir(dir)?;
@@ -95,13 +95,13 @@ fn analyze_header(file: &File) -> DataInfo {
 
     let mut base = DataInfo::new(cryptic, version, project_begin, project_size);
 
-    let index = &mut [0u32; 36];
-    for i in 0..36 {
+    let index = &mut [0u32; DIRECTORIES_LEN + 1];
+    for i in 0..DIRECTORIES_LEN + 1 {
         reader.read(bytes4).unwrap();
         index[i] = u32::from_le_bytes(*bytes4) + 168
     }
     let fragments = &mut base.fragments;
-    for i in 0..35 {
+    for i in 0..DIRECTORIES_LEN {
         let begin = index[i];
         let end = index[i + 1];
         fragments[i].begin = begin;
