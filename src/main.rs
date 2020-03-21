@@ -1,8 +1,8 @@
 extern crate clap;
 
 use std::{fs, panic};
-use std::fs::File;
-use std::io::{BufReader, Read, Seek, SeekFrom, Error};
+use std::fs::{File, OpenOptions};
+use std::io::{BufReader, Read, Seek, SeekFrom, Error, Write};
 use std::path::Path;
 
 use clap::{App, AppSettings};
@@ -31,10 +31,16 @@ fn main() -> Result<(), Error> {
             println!("target: {} | key: {} | output: {}", target, key, output);
 
             let path = Path::new(target);
-            let file = File::open(path).unwrap();
+            let mut file = OpenOptions::new().read(true).write(true).open(path).unwrap();
             let mut data = analyze_header(&file);
             analyze_fragments(&file, &mut data);
             println!("{}", serde_json::to_string(&data).unwrap());
+
+            if data.cryptic {
+                let key_path = Path::new(key);
+                let key = OpenOptions::new().read(true).open(key_path).unwrap();
+                decrypt(&mut file, &key, &mut data);
+            }
 
             create_unpack_dir(output)?;
         }
@@ -74,7 +80,7 @@ fn create_unpack_dir(output: &str) -> Result<(), Error> {
 fn analyze_header(file: &File) -> DataInfo {
     let len = file.metadata().unwrap().len();
 
-    let mut reader = BufReader::new(file);
+    let mut reader = BufReader::with_capacity(256, file);
     let bytes4 = &mut [0u8; 4];
 
     reader.read(bytes4).unwrap();
@@ -125,8 +131,7 @@ fn analyze_fragments<'a>(file: &'a File, data: &'a mut DataInfo) -> &'a DataInfo
     let bytes4 = &mut [0u8; 4];
     let buff = &mut [0u8; 1024];
 
-    let fragments = &mut data.fragments;
-    let mut resource_groups: Vec<_> = fragments.iter_mut()
+    let mut resource_groups: Vec<_> = data.fragments.iter_mut()
         .filter(|f| f.size != 0)
         .map(|f| {
             let position = SeekFrom::Start(f.begin as u64);
@@ -220,4 +225,65 @@ fn analyze_fragments<'a>(file: &'a File, data: &'a mut DataInfo) -> &'a DataInfo
             rg.resources = resources;
         });
     data
+}
+
+fn decrypt(target: &mut File, key: &File, data: &mut DataInfo) {
+    let mut key_reader = BufReader::new(key);
+
+    let source_buf = &mut [0u8; 1024];
+    let key_buf = &mut [0u8; 1024];
+
+    let fragments = &mut data.fragments;
+    let mut resources: Vec<_> = fragments.iter_mut()
+        .filter(|f| f.size != 0)
+        .flat_map(|f| &f.resource_group)
+        .flat_map(|rg| &rg.resources)
+        .collect();
+
+    let resource = Resource {
+        begin: data.project_begin,
+        end: data.project_begin + data.project_size - 1,
+        size: data.project_size,
+        name: "project".to_owned(),
+        suffix: "unknown".to_owned(),
+    };
+    resources.push(&resource);
+
+    resources.iter_mut().for_each(|res| {
+        let mut had_read = 0;
+        let mut had_write = 0;
+        target.seek(SeekFrom::Start(res.begin as u64)).unwrap();
+        key_reader.seek(SeekFrom::Start(0)).unwrap();
+
+        let mut src_read = target.read(source_buf).unwrap();
+        key_reader.read(key_buf).unwrap();
+
+        while src_read > 0 {
+            had_read += src_read;
+            for (b1, b2) in source_buf.iter_mut().zip(key_buf.iter()) {
+                *b1 ^= b2;
+            }
+            let size = res.size as usize;
+            let need_write = if had_read > size {
+                size - (had_read - 1024)
+            } else {
+                src_read
+            };
+            let write_slice = &source_buf[0..need_write];
+
+            target.seek(SeekFrom::Current(-(src_read as i64))).unwrap();
+            target.write(write_slice).unwrap();
+
+            had_write += need_write;
+            if had_write == size { return; }
+
+            src_read = target.read(source_buf).unwrap();
+            key_reader.read(key_buf).unwrap();
+        }
+        println!("{} had decrypted", res.name)
+    });
+
+    target.seek(SeekFrom::Start(4)).unwrap();
+    target.write(&[0, 0, 0, 1]).unwrap();
+    println!("decrypted!!", )
 }
